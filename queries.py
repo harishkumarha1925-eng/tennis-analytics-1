@@ -5,13 +5,15 @@ def run_query(query):
     engine = get_engine()
     return pd.read_sql(query, engine)
 
-
 def list_competitions_with_category():
     return run_query("""
-        SELECT c.competition_name, cat.category_name
+        SELECT c.competition_name,
+               IFNULL(cat.category_name, 'Unknown') AS category_name
         FROM Competitions c
         LEFT JOIN Categories cat ON c.category_id = cat.category_id
     """)
+
+
 
 
 def top_ranked_competitors(limit=5):
