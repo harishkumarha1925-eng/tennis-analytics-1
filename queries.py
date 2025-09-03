@@ -1,14 +1,21 @@
-from database_handler import get_engine
-import pandas as pd
-import streamlit as st
+from database_handler import get_connection
 
-def run_query(query):
-    engine = get_engine()
+def debug_query():
+    conn = get_connection()
+    cur = conn.cursor()
     try:
-        return pd.read_sql(query, engine)
+        cur.execute("""
+            SELECT c.competition_name, c.type, c.gender, cat.category_name
+            FROM Competitions c
+            LEFT JOIN Categories cat ON c.category_id = cat.category_id
+            LIMIT 5
+        """)
+        return cur.fetchall()
     except Exception as e:
-        st.error(f"❌ SQL error (pandas): {repr(e)}")
-        return pd.DataFrame()
+        return str(e)
+    finally:
+        conn.close()
+
 
 def list_competitions_with_category():
     return run_query("""
