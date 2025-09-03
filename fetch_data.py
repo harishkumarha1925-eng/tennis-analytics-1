@@ -1,12 +1,13 @@
 import requests
-from database_handler import create_database, create_tables, get_connection
+from database_handler import create_tables, get_connection
+
 
 API_KEY = "Cg5QnQ4hGxac0zOPBxyZkVzuVkoEHSuAmoQ0dLiU"   # <-- put your real API key here
 BASE_URL = "https://api.sportradar.com/tennis/trial/v3/en"
 
 def fetch_and_store():
-    create_database()
-    create_tables()
+    # REMOVE create_database() ❌
+    create_tables()   # ✅ only create tables
     conn = get_connection()
     cur = conn.cursor()
 
@@ -60,7 +61,7 @@ def fetch_and_store():
             # Insert ranking
             cur.execute("""
             INSERT INTO Competitor_Rankings
-            (rank, movement, points, competitions_played, competitor_id)
+            (`rank`, movement, points, competitions_played, competitor_id)
             VALUES (%s,%s,%s,%s,%s)
             """, (
                 player["rank"], player["movement"], player["points"],

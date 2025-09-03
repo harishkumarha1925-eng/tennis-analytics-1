@@ -1,26 +1,51 @@
 import mysql.connector
+import os
+from dotenv import load_dotenv
+import streamlit as st
 
-# MySQL connection settings (XAMPP default)
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",         # change if you set another user
-    "password": "",         # enter password if set in XAMPP
-    "database": "tennis_db" # we’ll create this
-}
+# Load local .env if exists
+load_dotenv()
+
+def get_config():
+    if "DB_HOST" in os.environ:  # Local dev
+        return {
+            "host": os.getenv("DB_HOST"),
+            "user": os.getenv("DB_USER"),
+            "password": os.getenv("DB_PASS"),
+            "database": os.getenv("DB_NAME"),
+            "port": int(os.getenv("DB_PORT", 3306)),
+        }
+    else:  # Streamlit Cloud
+        return {
+            "host": st.secrets["DB_HOST"],
+            "user": st.secrets["DB_USER"],
+            "password": st.secrets["DB_PASS"],
+            "database": st.secrets["DB_NAME"],
+            "port": int(st.secrets["DB_PORT"]),
+        }
 
 def get_connection():
-    return mysql.connector.connect(**DB_CONFIG)
+    return mysql.connector.connect(**get_config())
 
-def create_database():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password=""
-    )
-    cur = conn.cursor()
-    cur.execute("CREATE DATABASE IF NOT EXISTS tennis_db")
-    conn.commit()
-    conn.close()
+    if "DB_HOST" in os.environ:  # Local dev via .env
+        return {
+            "host": os.getenv("DB_HOST"),
+            "user": os.getenv("DB_USER"),
+            "password": os.getenv("DB_PASS"),
+            "database": os.getenv("DB_NAME"),
+            "port": int(os.getenv("DB_PORT", 3306))
+        }
+    else:  # Streamlit Cloud (uses st.secrets)
+        return {
+            "host": st.secrets["DB_HOST"],
+            "user": st.secrets["DB_USER"],
+            "password": st.secrets["DB_PASS"],
+            "database": st.secrets["DB_NAME"],
+            "port": int(st.secrets["DB_PORT"])
+        }
+
+def get_connection():
+    return mysql.connector.connect(**get_config())
 
 def create_tables():
     conn = get_connection()
@@ -84,7 +109,7 @@ def create_tables():
     cur.execute("""
     CREATE TABLE IF NOT EXISTS Competitor_Rankings (
         rank_id INT AUTO_INCREMENT PRIMARY KEY,
-        rank INT NOT NULL,
+        `rank` INT NOT NULL,
         movement INT NOT NULL,
         points INT NOT NULL,
         competitions_played INT NOT NULL,
@@ -95,3 +120,4 @@ def create_tables():
 
     conn.commit()
     conn.close()
+    print("✅ Tables created successfully")
