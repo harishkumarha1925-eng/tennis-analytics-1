@@ -1,15 +1,17 @@
 from database_handler import get_engine
 import pandas as pd
+import streamlit as st
 
 def run_query(query):
-    """Run a SQL query safely with Pandas + SQLAlchemy engine"""
     engine = get_engine()
     try:
         return pd.read_sql(query, engine)
     except Exception as e:
-        import streamlit as st
-        st.error(f"SQL error: {str(e)}")
+        # Print both in Streamlit app and terminal logs
+        st.error(f"❌ SQL Error: {repr(e)}")
+        print("❌ SQL Error:", repr(e))
         return pd.DataFrame()
+
 
 # ---------------------------
 # Competitions + Categories
