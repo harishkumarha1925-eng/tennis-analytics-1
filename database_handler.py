@@ -3,11 +3,15 @@ import os
 from dotenv import load_dotenv
 import streamlit as st
 
-# Load local .env if exists
+# Load local .env if present
 load_dotenv()
 
 def get_config():
-    if "DB_HOST" in os.environ:  # Local dev
+    """
+    Get DB config from environment variables (local dev)
+    or Streamlit secrets (Streamlit Cloud).
+    """
+    if os.getenv("DB_HOST"):  # Local dev via .env
         return {
             "host": os.getenv("DB_HOST"),
             "user": os.getenv("DB_USER"),
@@ -15,7 +19,7 @@ def get_config():
             "database": os.getenv("DB_NAME"),
             "port": int(os.getenv("DB_PORT", 3306)),
         }
-    else:  # Streamlit Cloud
+    else:  # Streamlit Cloud (uses st.secrets)
         return {
             "host": st.secrets["DB_HOST"],
             "user": st.secrets["DB_USER"],
@@ -25,29 +29,11 @@ def get_config():
         }
 
 def get_connection():
-    return mysql.connector.connect(**get_config())
-
-    if "DB_HOST" in os.environ:  # Local dev via .env
-        return {
-            "host": os.getenv("DB_HOST"),
-            "user": os.getenv("DB_USER"),
-            "password": os.getenv("DB_PASS"),
-            "database": os.getenv("DB_NAME"),
-            "port": int(os.getenv("DB_PORT", 3306))
-        }
-    else:  # Streamlit Cloud (uses st.secrets)
-        return {
-            "host": st.secrets["DB_HOST"],
-            "user": st.secrets["DB_USER"],
-            "password": st.secrets["DB_PASS"],
-            "database": st.secrets["DB_NAME"],
-            "port": int(st.secrets["DB_PORT"])
-        }
-
-def get_connection():
+    """Return a live MySQL connection"""
     return mysql.connector.connect(**get_config())
 
 def create_tables():
+    """Create all required tables if they don't exist"""
     conn = get_connection()
     cur = conn.cursor()
 
@@ -120,4 +106,5 @@ def create_tables():
 
     conn.commit()
     conn.close()
-    print("✅ Tables created successfully")
+    print("Tables created successfully")
+
