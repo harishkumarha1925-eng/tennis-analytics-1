@@ -1,16 +1,21 @@
-import mysql.connector
+from sqlalchemy import create_engine
 import os
-from dotenv import load_dotenv
 import streamlit as st
+from dotenv import load_dotenv
 
-# Load local .env if present
 load_dotenv()
 
-def get_config():
-    """
-    Get DB config from environment variables (local dev)
-    or Streamlit secrets (Streamlit Cloud).
-    """
+def get_engine():
+    """Return an SQLAlchemy engine for Pandas queries"""
+    if os.getenv("DB_HOST"):  # Local dev
+        return create_engine(
+            f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+        )
+    else:  # Streamlit Cloud
+        return create_engine(
+            f"mysql+pymysql://{st.secrets['DB_USER']}:{st.secrets['DB_PASS']}@{st.secrets['DB_HOST']}:{st.secrets['DB_PORT']}/{st.secrets['DB_NAME']}"
+        )
+
     if os.getenv("DB_HOST"):  # Local dev via .env
         return {
             "host": os.getenv("DB_HOST"),

@@ -1,11 +1,10 @@
-from database_handler import get_connection
+from database_handler import get_engine
 import pandas as pd
 
 def run_query(query):
-    conn = get_connection()
-    df = pd.read_sql(query, conn)
-    conn.close()
-    return df
+    engine = get_engine()
+    return pd.read_sql(query, engine)
+
 
 def list_competitions_with_category():
     return run_query("""

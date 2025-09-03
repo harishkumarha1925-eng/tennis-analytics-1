@@ -1,8 +1,8 @@
 pandas
 sqlalchemy
 pymysql
-mysql-connector-python
-python-dotenv
 streamlit
+python-dotenv
+
 
 
